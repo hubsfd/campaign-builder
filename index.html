@@ -935,20 +935,20 @@ function exportPDF() {
       </div>` : "";
 
     return `
-    <div style="page-break-inside:avoid;margin-bottom:28px;border:1px solid #D8E2EE;border-radius:5px;overflow:hidden;">
+    <div style="page-break-before:always;page-break-inside:avoid;margin-bottom:28px;border:1px solid #D8E2EE;border-radius:5px;overflow:hidden;">
       <div style="background:#003057;padding:10px 16px;">
         <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;color:white;text-transform:uppercase;letter-spacing:0.04em;">${lead.contact || "Unnamed Contact"}</div>
-        <div style="font-size:11px;color:rgba(255,255,255,0.65);margin-top:2px;">${lead.company || ""}${lead.title?" · "+lead.title:""}${lead.phone?" · "+lead.phone:""}${lead.email?" · "+lead.email:""}</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.85);margin-top:2px;">${lead.company || ""}${lead.title?" · "+lead.title:""}${lead.phone?" · "+lead.phone:""}${lead.email?" · "+lead.email:""}</div>
       </div>
       <div style="padding:14px 16px;display:grid;grid-template-columns:1fr 1fr;gap:16px;border-bottom:1px solid #EEF2F7;">
         <div>
-          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#8FA3BB;margin-bottom:6px;">Research &amp; Context</div>
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#1E3048;margin-bottom:6px;">Research &amp; Context</div>
           ${lead.rapport?`<div style="font-size:12px;margin-bottom:6px;"><strong style="color:#003057;">Rapport:</strong> ${lead.rapport}</div>`:""}
           ${lead.newsItem?`<div style="font-size:12px;margin-bottom:6px;"><strong style="color:#003057;">Trigger:</strong> ${lead.newsItem}</div>`:""}
-          ${pains.length?`<div style="margin-top:8px;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#8FA3BB;margin-bottom:4px;">Identified Pains</div>${pains.map((p,pi)=>`<div style="font-size:12px;padding:3px 0;border-bottom:1px solid #EEF2F7;"><strong style="color:#003057;">${pi+1}.</strong> ${p}</div>`).join("")}</div>`:""}
+          ${pains.length?`<div style="margin-top:8px;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#1E3048;margin-bottom:4px;">Identified Pains</div>${pains.map((p,pi)=>`<div style="font-size:12px;padding:3px 0;border-bottom:1px solid #EEF2F7;"><strong style="color:#003057;">${pi+1}.</strong> ${p}</div>`).join("")}</div>`:""}
         </div>
         <div>
-          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#8FA3BB;margin-bottom:6px;">Cadence Commitment</div>
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#1E3048;margin-bottom:6px;">Cadence Commitment</div>
           <table style="width:100%;border-collapse:collapse;font-size:11px;">
             <thead><tr style="background:#003057;"><th style="color:white;padding:5px 8px;text-align:left;font-family:'Barlow Condensed',sans-serif;font-size:10px;text-transform:uppercase;">Day</th><th style="color:white;padding:5px 8px;text-align:left;font-family:'Barlow Condensed',sans-serif;font-size:10px;text-transform:uppercase;">Date</th><th style="color:white;padding:5px 8px;text-align:left;font-family:'Barlow Condensed',sans-serif;font-size:10px;text-transform:uppercase;">Channels</th></tr></thead>
             <tbody>${cadenceRows}</tbody>
@@ -956,7 +956,7 @@ function exportPDF() {
         </div>
       </div>
       <div style="padding:14px 16px;">
-        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#8FA3BB;margin-bottom:10px;">Outreach Scripts</div>
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#1E3048;margin-bottom:10px;">Outreach Scripts</div>
         ${scriptBlock("Cold Call Opener", lead.scriptCall)}
         ${lead.scriptSubj || lead.scriptEmail ? `
         <div style="margin-bottom:12px;">
@@ -978,20 +978,20 @@ function exportPDF() {
     .header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px solid #003057; padding-bottom: 10px; margin-bottom: 20px; }
     .header h1 { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 800; color: #003057; text-transform: uppercase; letter-spacing: 0.04em; }
     .header h1 span { color: #F5A800; }
-    .header .meta { font-size: 12px; color: #8FA3BB; text-align: right; line-height: 1.6; }
+    .header .meta { font-size: 12px; color: #4A6580; text-align: right; line-height: 1.6; }
     .campaign-info { background: #F7F9FC; border: 1px solid #D8E2EE; border-radius: 4px; padding: 12px 16px; margin-bottom: 20px; display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
-    .ci-item .ci-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em; color: #8FA3BB; margin-bottom: 2px; }
+    .ci-item .ci-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em; color: #1E3048; margin-bottom: 2px; }
     .ci-item .ci-value { font-size: 13px; font-weight: 600; color: #003057; }
     .spin-section { margin-top: 32px; border: 2px solid #F5A800; border-radius: 5px; overflow: hidden; page-break-inside: avoid; }
     .spin-header { background: #F5A800; padding: 12px 16px; }
     .spin-header h2 { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 800; text-transform: uppercase; color: #003057; letter-spacing: 0.05em; }
-    .spin-header p { font-size: 11px; color: #003057; opacity: 0.75; margin-top: 3px; }
+    .spin-header p { font-size: 11px; color: #003057; margin-top: 3px; }
     .spin-body { padding: 14px 16px; }
-    .spin-body p { font-size: 12px; color: #4A6580; margin-bottom: 10px; line-height: 1.5; }
+    .spin-body p { font-size: 12px; color: #1E3048; margin-bottom: 10px; line-height: 1.5; }
     .spin-prompt { font-family: 'Barlow', sans-serif; font-size: 11px; white-space: pre-wrap; background: #F7F9FC; border: 1px solid #D8E2EE; border-radius: 4px; padding: 14px; line-height: 1.6; color: #1E3048; }
-    .footer { margin-top: 24px; padding-top: 10px; border-top: 1px solid #D8E2EE; font-size: 10px; color: #8FA3BB; text-align: center; }
+    .footer { margin-top: 24px; padding-top: 10px; border-top: 1px solid #D8E2EE; font-size: 10px; color: #4A6580; text-align: center; }
     tbody tr:nth-child(even) { background: #F7F9FC; }
-    tbody td { padding: 5px 8px; border-bottom: 1px solid #EEF2F7; }
+    tbody td { padding: 5px 8px; border-bottom: 1px solid #EEF2F7; color: #1E3048; }
     @media print { .spin-section { page-break-before: always; } }
   </style>
   </head><body>
