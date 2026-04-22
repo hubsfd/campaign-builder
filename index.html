@@ -935,10 +935,10 @@ function exportPDF() {
       </div>` : "";
 
     return `
-    <div style="page-break-before:always;page-break-inside:avoid;margin-bottom:28px;border:1px solid #D8E2EE;border-radius:5px;overflow:hidden;">
-      <div style="background:#003057;padding:10px 16px;">
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;color:white;text-transform:uppercase;letter-spacing:0.04em;">${lead.contact || "Unnamed Contact"}</div>
-        <div style="font-size:11px;color:rgba(255,255,255,0.85);margin-top:2px;">${lead.company || ""}${lead.title?" · "+lead.title:""}${lead.phone?" · "+lead.phone:""}${lead.email?" · "+lead.email:""}</div>
+    <div style="page-break-before:always;page-break-inside:avoid;margin-bottom:28px;border:1px solid #D8E2EE;border-left:5px solid #003057;border-radius:5px;overflow:hidden;">
+      <div style="background:white;padding:12px 16px;border-bottom:2px solid #003057;">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;color:#003057;text-transform:uppercase;letter-spacing:0.04em;">${lead.contact || "Unnamed Contact"}</div>
+        <div style="font-size:12px;color:#1E3048;margin-top:3px;">${lead.company || ""}${lead.title?" · "+lead.title:""}${lead.phone?" · "+lead.phone:""}${lead.email?" · "+lead.email:""}</div>
       </div>
       <div style="padding:14px 16px;display:grid;grid-template-columns:1fr 1fr;gap:16px;border-bottom:1px solid #EEF2F7;">
         <div>
