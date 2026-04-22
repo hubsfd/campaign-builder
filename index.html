@@ -261,8 +261,8 @@
   <div class="nav-step" id="nav-2" onclick="goToPanel(2)">
     <div class="ns-num">2</div> Leads &amp; Research
   </div>
-  <div class="nav-step" id="nav-3" onclick="goToPanel(3)">
-    <div class="ns-num">3</div> SPIN Prep
+    <div class="nav-step" id="nav-3" onclick="goToPanel(3)">
+    <div class="ns-num">3</div> Outreach Prep
   </div>
   <div class="nav-step" id="nav-4" onclick="goToPanel(4)">
     <div class="ns-num">4</div> Cadence Commitment
@@ -339,29 +339,23 @@
 
         <div class="btn-row">
           <button class="btn-secondary" onclick="goToPanel(1)">← Back</button>
-          <button class="btn-primary" onclick="goToPanel(3)">Next: SPIN Prep →</button>
+          <button class="btn-primary" onclick="goToPanel(3)">Next: Outreach Prep →</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- PANEL 3: SPIN PREP -->
+  <!-- PANEL 3: OUTREACH PREP -->
   <div class="panel" id="panel-3">
     <div class="card">
       <div class="card-header">
         <span class="step-badge">STEP 3</span>
-        <h2>SPIN Question Prep</h2>
+        <h2>Outreach Prep</h2>
       </div>
       <div class="card-body">
-        <p style="font-size:13px;color:var(--gray-600);margin-bottom:8px;">For each lead, generate a set of SPIN questions based on your research. These are <strong>prospecting tools</strong> — they help you think about the pain you might uncover and shape how you open the conversation. You may not get to all of them on a cold call. The goal is always to earn the next conversation.</p>
-
-        <div style="background:#E8F3FA;border:1px solid var(--cyan);border-radius:4px;padding:10px 14px;font-size:12px;color:#0A4A6E;margin-bottom:20px;line-height:1.55;">
-          💡 <strong>What these questions are for:</strong> SPIN questions help you think through the pain a prospect might be experiencing before you pick up the phone. On a cold call, you may only get to ask one or two — and that's fine. The point is to be prepared so that when the prospect says something that hints at a problem, you know how to follow it. Your only goal on this call is to earn a first meeting.
-        </div>
-
-        <div id="spinLeadTabs" class="lead-tabs"></div>
-        <div id="spinForms"></div>
-
+        <p style="font-size:13px;color:var(--gray-600);margin-bottom:16px;">Review and edit your outreach scripts for each lead. These are pre-populated from your research notes — customize them before you send. Your only goal is to earn a first conversation.</p>
+        <div id="outreachLeadTabs" class="lead-tabs"></div>
+        <div id="outreachForms"></div>
         <div class="btn-row">
           <button class="btn-secondary" onclick="goToPanel(2)">← Back</button>
           <button class="btn-primary" onclick="goToPanel(4)">Next: Cadence Commitment →</button>
@@ -420,6 +414,7 @@ let leads = [];
 let numLeads = 1;
 const MAX_LEADS = 10;
 
+
 const CADENCE_DAYS = [
   { day: "Day 1",  desc: "Initial outreach — LinkedIn message and/or email" },
   { day: "Day 4",  desc: "Phone call + follow-up email" },
@@ -429,16 +424,6 @@ const CADENCE_DAYS = [
 ];
 
 const CHANNELS = ["Phone", "Email", "LinkedIn", "Voicemail", "Other"];
-
-// ---- INIT ----
-function init() {
-  for (let i = 0; i < 1; i++) addLead(false);
-  renderLeadTabs();
-  renderSpinTabs();
-  renderCadenceForms();
-  showLeadForm(0);
-  showSpinForm(0);
-}
 
 function getLead(i) {
   return leads[i] || {};
@@ -523,29 +508,41 @@ function addLead(render = true) {
   `;
   document.getElementById("leadForms").appendChild(lf);
 
-  // Spin form
+  // Outreach form
   const sf = document.createElement("div");
   sf.className = "lead-form";
-  sf.id = `spin-form-${i}`;
+  sf.id = `outreach-form-${i}`;
   sf.innerHTML = `
-    <div class="spin-section">
-      <div class="spin-generate-bar">
-        <p><strong>Generate SPIN questions for this lead.</strong><br>Claude will use your research notes and identified pains to build tailored questions for this prospect.</p>
-        <button class="btn-generate" id="btn-gen-${i}" onclick="generateSpin(${i})">Generate Questions</button>
-      </div>
-      <div class="spin-loading" id="spin-loading-${i}">
-        <div class="spinner"></div>
-        <span>Generating your SPIN questions...</span>
-      </div>
-      <div class="spin-output" id="spin-output-${i}">
-        <div class="spin-cards" id="spin-cards-${i}"></div>
-        <div class="spin-reminder">
-          ⚠️ <span><strong>Cold call reminder:</strong> These questions are preparation, not a script. On a cold call, your only goal is to earn a first meeting. Lead with your trigger event or rapport hook to open the conversation. If the prospect engages, one well-placed Problem or Implication question can be enough to move things forward. Don't try to cover everything — just get the next commitment.</span>
-        </div>
+    <div style="background:#E8F3FA;border:1px solid var(--cyan);border-radius:4px;padding:10px 14px;font-size:12px;color:#0A4A6E;margin-bottom:16px;line-height:1.55;">
+      💡 These scripts are pre-populated from your research. Edit them to match your voice before sending. The <strong>[brackets]</strong> are placeholders — replace every one before you use the script.
+    </div>
+    <div class="section-divider">Cold Call Opener</div>
+    <div class="field" style="margin-bottom:16px;">
+      <textarea class="script-ta" id="script-call-${i}" style="min-height:110px;"></textarea>
+      <span class="hint">Keep it under 30 seconds. Your goal: get them curious enough to agree to a real conversation.</span>
+    </div>
+    <div class="section-divider">Voicemail</div>
+    <div class="field" style="margin-bottom:16px;">
+      <textarea class="script-ta" id="script-vm-${i}" style="min-height:110px;"></textarea>
+      <span class="hint">15-20 seconds max. State your name, company, one specific reason you called, and your number twice.</span>
+    </div>
+    <div class="section-divider">Email</div>
+    <div class="field-row" style="margin-bottom:8px;">
+      <div class="field">
+        <label>Subject Line</label>
+        <input type="text" id="script-subj-${i}" placeholder="Email subject line">
       </div>
     </div>
+    <div class="field" style="margin-bottom:16px;">
+      <textarea class="script-ta" id="script-email-${i}" style="min-height:130px;"></textarea>
+    </div>
+    <div class="section-divider">LinkedIn Message</div>
+    <div class="field">
+      <textarea class="script-ta" id="script-li-${i}" style="min-height:90px;"></textarea>
+      <span class="hint">LinkedIn caps connection messages at 300 characters. Keep it personal and brief.</span>
+    </div>
   `;
-  document.getElementById("spinForms").appendChild(sf);
+  document.getElementById("outreachForms").appendChild(sf);
 
   // Cadence form
   renderCadenceForLead(i);
@@ -553,9 +550,10 @@ function addLead(render = true) {
   if (render) {
     numLeads++;
     renderLeadTabs();
-    renderSpinTabs();
+    renderOutreachTabs();
+    populateScripts(i);
     showLeadForm(i);
-    showSpinForm(i);
+    showOutreachForm(i);
   } else {
     numLeads++;
   }
@@ -603,12 +601,10 @@ function updateTabLabel(i) {
   const label = company || contact || `Lead ${i+1}`;
   const tab = document.getElementById(`lead-tab-${i}`);
   if (tab) tab.querySelector(".tab-text").textContent = label.length > 14 ? label.substring(0,14)+"…" : label;
-  const stab = document.getElementById(`spin-tab-${i}`);
-  if (stab) stab.querySelector(".tab-text").textContent = label.length > 14 ? label.substring(0,14)+"…" : label;
-  // Update cadence title
+  const otab = document.getElementById(`outreach-tab-${i}`);
+  if (otab) otab.querySelector(".tab-text").textContent = label.length > 14 ? label.substring(0,14)+"…" : label;
   const cname = document.getElementById(`cadence-name-${i}`);
   if (cname) cname.textContent = (contact || company) ? `${contact}${company ? " — "+company : ""}` : "Not yet named";
-  // Mark has-data
   if (tab && hasData(i)) tab.classList.add("has-data");
 }
 
@@ -634,136 +630,110 @@ function renderLeadTabs() {
   }
 }
 
-function renderSpinTabs() {
-  const container = document.getElementById("spinLeadTabs");
+function renderOutreachTabs() {
+  const container = document.getElementById("outreachLeadTabs");
   container.innerHTML = "";
   for (let i = 0; i < numLeads - 1; i++) {
     const label = val(`lead-company-${i}`) || val(`lead-contact-${i}`) || `Lead ${i+1}`;
     const short = label.length > 14 ? label.substring(0,14)+"…" : label;
     const btn = document.createElement("div");
     btn.className = "lead-tab";
-    btn.id = `spin-tab-${i}`;
+    btn.id = `outreach-tab-${i}`;
     btn.innerHTML = `<div class="tab-dot"></div><span class="tab-text">${short}</span>`;
-    btn.onclick = () => showSpinForm(i);
+    btn.onclick = () => showOutreachForm(i);
     container.appendChild(btn);
   }
 }
 
+function showOutreachForm(i) {
+  document.querySelectorAll("#outreachForms .lead-form").forEach(f => f.classList.remove("active"));
+  document.querySelectorAll("#outreachLeadTabs .lead-tab").forEach(t => t.classList.remove("active"));
+  const form = document.getElementById(`outreach-form-${i}`);
+  const tab = document.getElementById(`outreach-tab-${i}`);
+  if (form) form.classList.add("active");
+  if (tab) tab.classList.add("active");
+}
+
+function populateScripts(i) {
+  saveLead(i);
+  const lead = leads[i];
+  const contact = lead.contact || "[Prospect Name]";
+  const firstName = contact.split(" ")[0] || "[First Name]";
+  const company = lead.company || "[Company]";
+  const title = lead.title || "[Title]";
+  const trigger = lead.newsItem || "[insert news item or trigger event]";
+  const rapport = lead.rapport || "[shared connection or personal detail]";
+  const pain1 = lead.pain1 || "[potential challenge]";
+  const producer = val("producerName") || "[Your Name]";
+
+  // Cold call
+  const callScript =
+`Hi ${firstName}, this is ${producer} with HUB International.
+
+I came across ${trigger} — and it made me think there might be a worthwhile conversation here. I work with ${title}s in your space to make sure their risk and insurance programs are actually performing the way they expect them to.
+
+I'd love to ask you a couple of quick questions to see if there's a reason for us to connect. Do you have two minutes?
+
+[IF YES: Ask one open question based on your research notes.]
+[IF NO: Offer a specific day and time to call back, or offer to send a brief email.]`;
+
+  // Voicemail
+  const vmScript =
+`Hi ${firstName}, this is ${producer} with HUB International — my number is [YOUR PHONE].
+
+I'm calling because I saw ${trigger} and wanted to reach out. I work with ${title}s in [INDUSTRY] to make sure their insurance and risk programs are actually performing the way they expect.
+
+I'll follow up by email, but feel free to reach me at [YOUR PHONE] — that's [YOUR PHONE]. Thanks, ${firstName}.`;
+
+  // Email subject
+  const emailSubject = `Quick question, ${firstName}`;
+
+  // Email body
+  const emailBody =
+`Hi ${firstName},
+
+I came across ${trigger} and wanted to reach out.
+
+I work with businesses like ${company} to make sure their risk and insurance programs are doing what they're supposed to do — especially during periods of growth or change.
+
+I'm not asking for a lot of your time. I'd just like to ask a couple of quick questions to see if there's a reason to connect. Would you be open to a 15-minute call this week?
+
+[YOUR NAME]
+[YOUR PHONE] | [YOUR EMAIL]`;
+
+  // LinkedIn
+  const liScript =
+`Hi ${firstName} — ${rapport ? `I noticed ${rapport}. ` : ""}I work with ${title}s in your space on risk strategy and wanted to connect. Would love to share a quick thought if you're open to it.`;
+
+  // Only populate if fields are empty (don't overwrite edits)
+  const setIfEmpty = (id, text) => {
+    const el = document.getElementById(id);
+    if (el && !el.value.trim()) el.value = text;
+  };
+
+  setIfEmpty(`script-call-${i}`, callScript);
+  setIfEmpty(`script-vm-${i}`, vmScript);
+  setIfEmpty(`script-subj-${i}`, emailSubject);
+  setIfEmpty(`script-email-${i}`, emailBody);
+  setIfEmpty(`script-li-${i}`, liScript);
+}
+
+function saveScripts(i) {
+  if (!leads[i]) leads[i] = {};
+  leads[i].scriptCall  = document.getElementById(`script-call-${i}`)?.value || "";
+  leads[i].scriptVm    = document.getElementById(`script-vm-${i}`)?.value || "";
+  leads[i].scriptSubj  = document.getElementById(`script-subj-${i}`)?.value || "";
+  leads[i].scriptEmail = document.getElementById(`script-email-${i}`)?.value || "";
+  leads[i].scriptLi    = document.getElementById(`script-li-${i}`)?.value || "";
+}
+
 function showLeadForm(i) {
-  document.querySelectorAll(".lead-form").forEach(f => f.classList.remove("active"));
-  document.querySelectorAll(".lead-tab").forEach(t => t.classList.remove("active"));
+  document.querySelectorAll("#leadForms .lead-form").forEach(f => f.classList.remove("active"));
+  document.querySelectorAll("#leadTabs .lead-tab").forEach(t => t.classList.remove("active"));
   const form = document.getElementById(`lead-form-${i}`);
   const tab = document.getElementById(`lead-tab-${i}`);
   if (form) form.classList.add("active");
   if (tab) tab.classList.add("active");
-}
-
-function showSpinForm(i) {
-  document.querySelectorAll("#spinForms .lead-form").forEach(f => f.classList.remove("active"));
-  document.querySelectorAll("#spinLeadTabs .lead-tab").forEach(t => t.classList.remove("active"));
-  const form = document.getElementById(`spin-form-${i}`);
-  const tab = document.getElementById(`spin-tab-${i}`);
-  if (form) form.classList.add("active");
-  if (tab) tab.classList.add("active");
-}
-
-function saveAllLeads() {
-  for (let i = 0; i < numLeads - 1; i++) saveLead(i);
-}
-
-// ---- SPIN GENERATION ----
-async function generateSpin(i) {
-  saveLead(i);
-  const lead = leads[i];
-
-  const pains = [lead.pain1, lead.pain2, lead.pain3].filter(Boolean);
-  if (!lead.company && !lead.contact && pains.length === 0 && !lead.newsItem) {
-    alert("Please fill in at least the company name, a pain/challenge, or a research note before generating SPIN questions.");
-    return;
-  }
-
-  const btn = document.getElementById(`btn-gen-${i}`);
-  const loading = document.getElementById(`spin-loading-${i}`);
-  const output = document.getElementById(`spin-output-${i}`);
-
-  btn.disabled = true;
-  loading.classList.add("show");
-  output.classList.remove("show");
-
-  const prompt = `You are a sales coach at HUB International, an insurance brokerage. A producer is preparing to cold call a prospect. Their goal is NOT to run a full discovery — it is to earn a first conversation. Generate SPIN questions to help them prepare.
-
-Prospect details:
-- Company: ${lead.company || "Not specified"}
-- Contact: ${lead.contact || "Not specified"} (${lead.title || "Title unknown"})
-- Research / trigger event: ${lead.newsItem || "None provided"}
-- Rapport hook: ${lead.rapport || "None provided"}
-- Possible pains/challenges identified: ${pains.length > 0 ? pains.join("; ") : "None provided"}
-
-Generate SPIN questions in this exact JSON format. Each type should have 2-3 questions maximum. Keep questions conversational and appropriate for a cold call — brief, natural, not interrogative. Implication questions should connect the pain to business consequences without being presumptuous. Need-Payoff questions should open the door to a solution without naming one specifically.
-
-Return ONLY valid JSON, no other text:
-{
-  "situation": ["question 1", "question 2"],
-  "problem": ["question 1", "question 2"],
-  "implication": ["question 1", "question 2"],
-  "needPayoff": ["question 1", "question 2"]
-}`;
-
-  try {
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 1000,
-        messages: [{ role: "user", content: prompt }]
-      })
-    });
-
-    const data = await response.json();
-    const text = data.content.map(c => c.text || "").join("").trim();
-    const clean = text.replace(/```json|```/g, "").trim();
-    const parsed = JSON.parse(clean);
-
-    leads[i].spin = parsed;
-    renderSpinOutput(i, parsed);
-    output.classList.add("show");
-
-    // Mark spin tab as done
-    const tab = document.getElementById(`spin-tab-${i}`);
-    if (tab) tab.classList.add("has-data");
-
-  } catch(err) {
-    output.innerHTML = `<div style="color:var(--danger);font-size:13px;padding:10px 0;">Something went wrong generating questions. Please check your research notes and try again.</div>`;
-    output.classList.add("show");
-  }
-
-  loading.classList.remove("show");
-  btn.disabled = false;
-  btn.textContent = "Regenerate";
-}
-
-function renderSpinOutput(i, spin) {
-  const container = document.getElementById(`spin-cards-${i}`);
-  const types = [
-    { key: "situation",  cls: "S", label: "Situation",   desc: "Establish context — keep it brief" },
-    { key: "problem",    cls: "P", label: "Problem",     desc: "Surface the pain" },
-    { key: "implication",cls: "I", label: "Implication", desc: "Connect pain to consequences — most powerful" },
-    { key: "needPayoff", cls: "N", label: "Need-Payoff", desc: "Open the door to a solution" },
-  ];
-  container.innerHTML = types.map(t => {
-    const qs = spin[t.key] || [];
-    return `
-    <div class="spin-card ${t.cls}">
-      <div class="spin-card-header">
-        <span class="spin-type">${t.label}</span>
-        <span class="spin-desc">${t.desc}</span>
-      </div>
-      <div class="spin-card-body">
-        ${qs.map(q => `<div class="spin-q">${q}</div>`).join("")}
-      </div>
-    </div>`;
-  }).join("");
 }
 
 // ---- NAVIGATION ----
@@ -790,13 +760,21 @@ function goToPanel(n) {
     }
   }
 
-  // Sync spin tabs
+  // Sync outreach tabs and populate scripts
   if (n === 3) {
-    renderSpinTabs();
-    showSpinForm(0);
+    renderOutreachTabs();
+    for (let i = 0; i < numLeads - 1; i++) populateScripts(i);
+    showOutreachForm(0);
   }
 
   window.scrollTo(0, 0);
+}
+
+function saveAllLeads() {
+  for (let i = 0; i < numLeads - 1; i++) {
+    saveLead(i);
+    saveScripts(i);
+  }
 }
 
 // ---- REVIEW ----
@@ -812,7 +790,7 @@ function buildReview() {
   const i2 = val("industry2") || "—";
   const goal = val("campaignGoal") || "—";
 
-  const filledLeads = leads.filter((l, i) => l && (l.company || l.contact));
+  const filledLeads = leads.filter((l) => l && (l.company || l.contact));
 
   let html = `
   <div class="summary-strip">
@@ -822,12 +800,10 @@ function buildReview() {
     <div class="ss-item"><div class="ss-label">Leads</div><div class="ss-value">${filledLeads.length}</div></div>
   </div>`;
 
-  filledLeads.forEach((lead, idx) => {
+  filledLeads.forEach((lead) => {
     const realIdx = leads.indexOf(lead);
-    const spin = lead.spin;
     const pains = [lead.pain1, lead.pain2, lead.pain3].filter(Boolean);
 
-    // Cadence summary
     const cadenceSummary = CADENCE_DAYS.map((d, di) => {
       const date = document.getElementById(`cad-date-${realIdx}-${di}`)?.value || "";
       const channels = CHANNELS.filter(ch => document.getElementById(`cad-ch-${realIdx}-${di}-${ch.toLowerCase()}`)?.checked).join(", ");
@@ -846,29 +822,23 @@ function buildReview() {
           <div class="rh-company">${lead.company || ""}${lead.title ? " · " + lead.title : ""}${lead.source ? " · Source: " + lead.source : ""}</div>
         </div>
       </div>
-      <div class="review-lead-body">
-        <div>
-          <div class="review-section-title">Contact</div>
-          <div class="review-item">${lead.phone || "—"}<span>Phone</span></div>
-          <div class="review-item" style="margin-top:6px;">${lead.email || "—"}<span>Email</span></div>
-          ${lead.rapport ? `<div class="review-item" style="margin-top:10px;">${lead.rapport}<span>Rapport Hook</span></div>` : ""}
-          ${lead.newsItem ? `<div class="review-item" style="margin-top:10px;">${lead.newsItem}<span>Trigger / News Item</span></div>` : ""}
-          ${pains.length ? `<div style="margin-top:10px;"><div class="review-section-title">Identified Pains</div>${pains.map((p,pi) => `<div class="review-item" style="margin-bottom:4px;"><span class="pain-num">${pi+1}</span>${p}</div>`).join("")}</div>` : ""}
-        </div>
-        <div>
-          <div class="review-section-title">SPIN Questions</div>
-          ${spin ? `
-            ${["situation","problem","implication","needPayoff"].map(type => {
-              const labels = {situation:"Situation",problem:"Problem",implication:"Implication",needPayoff:"Need-Payoff"};
-              const qs = spin[type] || [];
-              return qs.length ? `<div style="margin-bottom:8px;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--gray-600);margin-bottom:3px;">${labels[type]}</div>${qs.map(q => `<div style="font-size:12px;color:var(--gray-800);padding:2px 0;line-height:1.45;border-bottom:1px solid var(--gray-100);">${q}</div>`).join("")}</div>` : "";
-            }).join("")}
-          ` : `<div class="no-spin-note">No SPIN questions generated for this lead.</div>`}
-          <div style="margin-top:12px;">
+      <div style="padding:16px 18px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:12px;">
+          <div>
+            <div class="review-section-title">Contact</div>
+            <div class="review-item">${lead.phone || "—"}<span>Phone</span></div>
+            <div class="review-item" style="margin-top:6px;">${lead.email || "—"}<span>Email</span></div>
+            ${lead.rapport ? `<div class="review-item" style="margin-top:8px;">${lead.rapport}<span>Rapport Hook</span></div>` : ""}
+            ${lead.newsItem ? `<div class="review-item" style="margin-top:8px;">${lead.newsItem}<span>Trigger / News Item</span></div>` : ""}
+            ${pains.length ? `<div style="margin-top:10px;"><div class="review-section-title">Identified Pains</div>${pains.map((p,pi) => `<div class="review-item" style="margin-bottom:4px;"><span class="pain-num">${pi+1}</span>${p}</div>`).join("")}</div>` : ""}
+          </div>
+          <div>
             <div class="review-section-title">Cadence Commitment</div>
             ${cadenceSummary}
           </div>
         </div>
+        ${lead.scriptCall ? `<div style="margin-bottom:10px;"><div class="review-section-title">Cold Call Opener</div><pre style="font-family:'Barlow',sans-serif;font-size:12px;white-space:pre-wrap;background:var(--gray-50);border:1px solid var(--gray-200);border-radius:3px;padding:10px;line-height:1.55;color:var(--gray-800);">${lead.scriptCall}</pre></div>` : ""}
+        ${lead.scriptEmail ? `<div style="margin-bottom:10px;"><div class="review-section-title">Email${lead.scriptSubj ? ` — Subject: "${lead.scriptSubj}"` : ""}</div><pre style="font-family:'Barlow',sans-serif;font-size:12px;white-space:pre-wrap;background:var(--gray-50);border:1px solid var(--gray-200);border-radius:3px;padding:10px;line-height:1.55;color:var(--gray-800);">${lead.scriptEmail}</pre></div>` : ""}
       </div>
     </div>`;
   });
@@ -877,7 +847,61 @@ function buildReview() {
     html += `<p style="color:var(--gray-400);font-size:13px;font-style:italic;">No leads entered yet. Go back to Step 2 to add your leads.</p>`;
   }
 
+  // SPIN Claude prompt section
+  const spinPrompt = buildSpinPrompt(filledLeads);
+  html += `
+  <div style="margin-top:32px;border:2px solid var(--amber);border-radius:6px;overflow:hidden;">
+    <div style="background:var(--amber);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+      <div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:var(--navy);">Next Step: SPIN Question Prep</div>
+        <div style="font-size:12px;color:var(--navy);opacity:0.75;margin-top:2px;">When you're ready to go deeper — after your first round of outreach — use this prompt in Claude to build tailored SPIN questions for each prospect.</div>
+      </div>
+      <button class="btn-primary" onclick="copySpinPrompt()" id="copyBtn" style="background:var(--navy);white-space:nowrap;">📋 Copy Prompt</button>
+    </div>
+    <div style="padding:16px 18px;">
+      <p style="font-size:12px;color:var(--gray-600);margin-bottom:10px;line-height:1.5;">Copy this prompt and paste it into <strong>claude.ai</strong>. Claude will generate Situation, Problem, Implication, and Need-Payoff questions for each of your leads based on your research.</p>
+      <div style="background:#FEF3E2;border:1px solid #F5C67A;border-radius:3px;padding:9px 12px;font-size:12px;color:#7A4800;line-height:1.5;margin-bottom:10px;">💡 <strong>The more detail you entered in Step 2, the better these questions will be.</strong> If a lead is missing a trigger event, rapport hook, or identified pains, go back and fill those in before copying this prompt — Claude can only work with what you gave it.</div>
+      <pre id="spinPromptText" style="font-family:'Barlow',sans-serif;font-size:12px;white-space:pre-wrap;background:var(--gray-50);border:1px solid var(--gray-200);border-radius:4px;padding:14px;line-height:1.6;color:var(--gray-800);max-height:260px;overflow-y:auto;">${spinPrompt}</pre>
+    </div>
+  </div>`;
+
   container.innerHTML = html;
+}
+
+// ---- SPIN PROMPT ----
+function buildSpinPrompt(filledLeads) {
+  const producer = val("producerName") || "a HUB International producer";
+  const i1 = val("industry1") || "";
+  const i2 = val("industry2") || "";
+  const industries = [i1, i2].filter(Boolean).join(" and ");
+
+  let prompt = `I am a producer at HUB International preparing for discovery conversations with prospects in ${industries || "my target industries"}. I need help building SPIN questions for each prospect based on my pre-call research.
+
+For each prospect below, generate 2 Situation questions, 2 Problem questions, 2 Implication questions (these are the most important — connect the pain to business consequences), and 1-2 Need-Payoff questions that open the door to a solution without naming one specifically. Keep all questions conversational and appropriate for a first meeting — not a cold call. Format the output clearly by prospect.
+
+---\n`;
+
+  filledLeads.forEach((lead, idx) => {
+    const pains = [lead.pain1, lead.pain2, lead.pain3].filter(Boolean);
+    prompt += `
+PROSPECT ${idx + 1}: ${lead.contact || "Unknown"}
+Company: ${lead.company || "Unknown"}
+Title: ${lead.title || "Unknown"}
+Trigger / News Item: ${lead.newsItem || "None noted"}
+Rapport Hook: ${lead.rapport || "None noted"}
+Possible Pains/Challenges: ${pains.length ? pains.join("; ") : "None noted"}
+---`;
+  });
+
+  return prompt.trim();
+}
+
+function copySpinPrompt() {
+  const text = document.getElementById("spinPromptText")?.textContent || "";
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById("copyBtn");
+    if (btn) { btn.textContent = "✓ Copied!"; setTimeout(() => btn.textContent = "📋 Copy Prompt", 2000); }
+  });
 }
 
 // ---- EXPORT ----
@@ -892,11 +916,11 @@ function exportPDF() {
   const goal = val("campaignGoal") || "";
   const today = new Date().toLocaleDateString("en-US", {month:"long",day:"numeric",year:"numeric"});
   const filledLeads = leads.filter(l => l && (l.company || l.contact));
+  const spinPrompt = buildSpinPrompt(filledLeads);
 
-  let leadsHtml = filledLeads.map((lead, idx) => {
+  let leadsHtml = filledLeads.map((lead) => {
     const realIdx = leads.indexOf(lead);
     const pains = [lead.pain1, lead.pain2, lead.pain3].filter(Boolean);
-    const spin = lead.spin;
 
     const cadenceRows = CADENCE_DAYS.map((d, di) => {
       const date = document.getElementById(`cad-date-${realIdx}-${di}`)?.value || "Not set";
@@ -904,37 +928,43 @@ function exportPDF() {
       return `<tr><td style="font-weight:700;color:#003057;white-space:nowrap;">${d.day}</td><td style="color:#4A6580;font-size:11px;">${d.desc}</td><td>${date}</td><td>${channels || "—"}</td></tr>`;
     }).join("");
 
-    const spinHtml = spin ? ["situation","problem","implication","needPayoff"].map(type => {
-      const labels = {situation:"Situation",problem:"Problem",implication:"Implication (most important)",needPayoff:"Need-Payoff"};
-      const colors = {situation:"#0066A4",problem:"#B85C00",implication:"#C0392B",needPayoff:"#1A8F5A"};
-      const qs = spin[type] || [];
-      return qs.length ? `<div style="margin-bottom:8px;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:${colors[type]};margin-bottom:4px;">${labels[type]}</div>${qs.map(q=>`<div style="font-size:12px;padding:4px 0;border-bottom:1px solid #EEF2F7;line-height:1.45;color:#1E3048;">${q}</div>`).join("")}</div>` : "";
-    }).join("") : `<p style="font-size:12px;color:#8FA3BB;font-style:italic;">No SPIN questions generated.</p>`;
+    const scriptBlock = (label, text) => text ? `
+      <div style="margin-bottom:12px;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#0066A4;margin-bottom:5px;">${label}</div>
+        <pre style="font-family:'Barlow',sans-serif;font-size:11px;white-space:pre-wrap;background:#F7F9FC;border:1px solid #D8E2EE;border-radius:3px;padding:10px;line-height:1.55;color:#1E3048;">${text}</pre>
+      </div>` : "";
 
     return `
-    <div style="page-break-inside:avoid;margin-bottom:24px;border:1px solid #D8E2EE;border-radius:5px;overflow:hidden;">
+    <div style="page-break-inside:avoid;margin-bottom:28px;border:1px solid #D8E2EE;border-radius:5px;overflow:hidden;">
       <div style="background:#003057;padding:10px 16px;">
         <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;color:white;text-transform:uppercase;letter-spacing:0.04em;">${lead.contact || "Unnamed Contact"}</div>
         <div style="font-size:11px;color:rgba(255,255,255,0.65);margin-top:2px;">${lead.company || ""}${lead.title?" · "+lead.title:""}${lead.phone?" · "+lead.phone:""}${lead.email?" · "+lead.email:""}</div>
       </div>
-      <div style="padding:14px 16px;display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div style="padding:14px 16px;display:grid;grid-template-columns:1fr 1fr;gap:16px;border-bottom:1px solid #EEF2F7;">
         <div>
           <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#8FA3BB;margin-bottom:6px;">Research &amp; Context</div>
-          ${lead.rapport?`<div style="font-size:12px;margin-bottom:8px;"><strong style="color:#003057;">Rapport:</strong> ${lead.rapport}</div>`:""}
-          ${lead.newsItem?`<div style="font-size:12px;margin-bottom:8px;"><strong style="color:#003057;">Trigger:</strong> ${lead.newsItem}</div>`:""}
-          ${pains.length?`<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#8FA3BB;margin:10px 0 6px;">Identified Pains</div>${pains.map((p,pi)=>`<div style="font-size:12px;padding:3px 0;border-bottom:1px solid #EEF2F7;"><strong style="color:#003057;">${pi+1}.</strong> ${p}</div>`).join("")}`:""}
+          ${lead.rapport?`<div style="font-size:12px;margin-bottom:6px;"><strong style="color:#003057;">Rapport:</strong> ${lead.rapport}</div>`:""}
+          ${lead.newsItem?`<div style="font-size:12px;margin-bottom:6px;"><strong style="color:#003057;">Trigger:</strong> ${lead.newsItem}</div>`:""}
+          ${pains.length?`<div style="margin-top:8px;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#8FA3BB;margin-bottom:4px;">Identified Pains</div>${pains.map((p,pi)=>`<div style="font-size:12px;padding:3px 0;border-bottom:1px solid #EEF2F7;"><strong style="color:#003057;">${pi+1}.</strong> ${p}</div>`).join("")}</div>`:""}
         </div>
         <div>
-          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#8FA3BB;margin-bottom:6px;">SPIN Questions</div>
-          ${spinHtml}
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#8FA3BB;margin-bottom:6px;">Cadence Commitment</div>
+          <table style="width:100%;border-collapse:collapse;font-size:11px;">
+            <thead><tr style="background:#003057;"><th style="color:white;padding:5px 8px;text-align:left;font-family:'Barlow Condensed',sans-serif;font-size:10px;text-transform:uppercase;">Day</th><th style="color:white;padding:5px 8px;text-align:left;font-family:'Barlow Condensed',sans-serif;font-size:10px;text-transform:uppercase;">Date</th><th style="color:white;padding:5px 8px;text-align:left;font-family:'Barlow Condensed',sans-serif;font-size:10px;text-transform:uppercase;">Channels</th></tr></thead>
+            <tbody>${cadenceRows}</tbody>
+          </table>
         </div>
       </div>
-      <div style="padding:0 16px 14px;">
-        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#8FA3BB;margin-bottom:6px;">Cadence Commitment</div>
-        <table style="width:100%;border-collapse:collapse;font-size:12px;">
-          <thead><tr style="background:#003057;"><th style="color:white;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;padding:6px 10px;text-align:left;">Day</th><th style="color:white;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;padding:6px 10px;text-align:left;">Outreach Plan</th><th style="color:white;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;padding:6px 10px;text-align:left;">Date</th><th style="color:white;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;padding:6px 10px;text-align:left;">Channels</th></tr></thead>
-          <tbody>${cadenceRows}</tbody>
-        </table>
+      <div style="padding:14px 16px;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#8FA3BB;margin-bottom:10px;">Outreach Scripts</div>
+        ${scriptBlock("Cold Call Opener", lead.scriptCall)}
+        ${lead.scriptSubj || lead.scriptEmail ? `
+        <div style="margin-bottom:12px;">
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#0066A4;margin-bottom:5px;">Email${lead.scriptSubj ? ` — Subject: "${lead.scriptSubj}"` : ""}</div>
+          <pre style="font-family:'Barlow',sans-serif;font-size:11px;white-space:pre-wrap;background:#F7F9FC;border:1px solid #D8E2EE;border-radius:3px;padding:10px;line-height:1.55;color:#1E3048;">${lead.scriptEmail||""}</pre>
+        </div>` : ""}
+        ${scriptBlock("Voicemail", lead.scriptVm)}
+        ${scriptBlock("LinkedIn Message", lead.scriptLi)}
       </div>
     </div>`;
   }).join("");
@@ -952,10 +982,17 @@ function exportPDF() {
     .campaign-info { background: #F7F9FC; border: 1px solid #D8E2EE; border-radius: 4px; padding: 12px 16px; margin-bottom: 20px; display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
     .ci-item .ci-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em; color: #8FA3BB; margin-bottom: 2px; }
     .ci-item .ci-value { font-size: 13px; font-weight: 600; color: #003057; }
-    .reminder { background: #FEF3E2; border: 1px solid #F5C67A; border-radius: 4px; padding: 10px 14px; font-size: 11px; color: #7A4800; line-height: 1.5; margin-bottom: 20px; }
+    .spin-section { margin-top: 32px; border: 2px solid #F5A800; border-radius: 5px; overflow: hidden; page-break-inside: avoid; }
+    .spin-header { background: #F5A800; padding: 12px 16px; }
+    .spin-header h2 { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 800; text-transform: uppercase; color: #003057; letter-spacing: 0.05em; }
+    .spin-header p { font-size: 11px; color: #003057; opacity: 0.75; margin-top: 3px; }
+    .spin-body { padding: 14px 16px; }
+    .spin-body p { font-size: 12px; color: #4A6580; margin-bottom: 10px; line-height: 1.5; }
+    .spin-prompt { font-family: 'Barlow', sans-serif; font-size: 11px; white-space: pre-wrap; background: #F7F9FC; border: 1px solid #D8E2EE; border-radius: 4px; padding: 14px; line-height: 1.6; color: #1E3048; }
     .footer { margin-top: 24px; padding-top: 10px; border-top: 1px solid #D8E2EE; font-size: 10px; color: #8FA3BB; text-align: center; }
     tbody tr:nth-child(even) { background: #F7F9FC; }
-    tbody td { padding: 6px 10px; border-bottom: 1px solid #EEF2F7; }
+    tbody td { padding: 5px 8px; border-bottom: 1px solid #EEF2F7; }
+    @media print { .spin-section { page-break-before: always; } }
   </style>
   </head><body>
   <div class="header">
@@ -968,8 +1005,18 @@ function exportPDF() {
     <div class="ci-item"><div class="ci-label">Target Industry 2</div><div class="ci-value">${i2||"—"}</div></div>
     ${goal?`<div class="ci-item" style="grid-column:1/-1;"><div class="ci-label">Campaign Goal</div><div class="ci-value">${goal}</div></div>`:""}
   </div>
-  <div class="reminder">⚠️ <strong>Cold call reminder:</strong> These questions are preparation, not a script. Your only goal is to earn a first meeting. Lead with your trigger event or rapport hook, and use your SPIN questions to follow the prospect's lead — not as a checklist to get through. Track all outcomes in CORE.</div>
   ${leadsHtml || `<p style="color:#8FA3BB;font-style:italic;">No leads entered.</p>`}
+  <div class="spin-section">
+    <div class="spin-header">
+      <h2>Next Step: SPIN Question Prep</h2>
+      <p>When you're ready to go deeper — after your first round of outreach — copy this prompt into claude.ai to generate tailored SPIN questions for each prospect.</p>
+    </div>
+    <div class="spin-body">
+      <p>Go to <strong>claude.ai</strong>, start a new conversation, and paste the prompt below. Claude will generate Situation, Problem, Implication, and Need-Payoff questions for each of your leads based on your research notes.</p>
+      <div style="background:#FEF3E2;border:1px solid #F5C67A;border-radius:3px;padding:8px 12px;font-size:11px;color:#7A4800;line-height:1.5;margin:8px 0 10px;">💡 <strong>The more detail you entered in Step 2, the better these questions will be.</strong> If a lead is missing a trigger event, rapport hook, or identified pains, the questions will be more generic. Go back and fill in any gaps before using this prompt.</div>
+      <pre class="spin-prompt">${spinPrompt}</pre>
+    </div>
+  </div>
   <div class="footer">HUB International — Sales Force Development | Prospecting Campaign Builder</div>
   </body></html>`;
 
@@ -982,6 +1029,15 @@ function exportPDF() {
 
 // ---- START ----
 init();
+
+function init() {
+  for (let i = 0; i < 1; i++) addLead(false);
+  renderLeadTabs();
+  renderOutreachTabs();
+  renderCadenceForms();
+  showLeadForm(0);
+  showOutreachForm(0);
+}
 </script>
 </body>
 </html>
