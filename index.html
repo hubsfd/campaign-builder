@@ -570,18 +570,18 @@ function renderCadenceForLead(i) {
   div.innerHTML = `
     <div class="section-divider" id="cadence-title-${i}">Lead ${i+1}: <span id="cadence-name-${i}" style="color:var(--gray-400);font-weight:400;">Not yet named</span></div>
     <table class="cadence-table">
-      <thead><tr><th>Touchpoint</th><th>What you'll do</th><th>Planned Date</th><th>Channels</th></tr></thead>
+      <thead><tr><th>Touchpoint</th><th>Planned Date</th><th>Channels</th><th>Suggested Activity</th></tr></thead>
       <tbody>
         ${CADENCE_DAYS.map((d, di) => `
         <tr>
           <td><span class="day-badge">${d.day}</span></td>
-          <td>${d.desc}</td>
           <td><input type="date" class="date-input" id="cad-date-${i}-${di}"></td>
           <td>
             <div class="channel-checks">
               ${CHANNELS.map(ch => `<label class="ch-label"><input type="checkbox" id="cad-ch-${i}-${di}-${ch.toLowerCase()}"> ${ch}</label>`).join("")}
             </div>
           </td>
+          <td style="font-size:12px;color:var(--gray-600);">${d.desc}</td>
         </tr>`).join("")}
       </tbody>
     </table>
@@ -1020,11 +1020,13 @@ function exportPDF() {
   <div class="footer">HUB International — Sales Force Development | Prospecting Campaign Builder</div>
   </body></html>`;
 
-  const win = window.open("", "_blank");
-  win.document.write(html);
-  win.document.close();
-  win.focus();
-  setTimeout(() => win.print(), 700);
+  const blob = new Blob([html], { type: "text/html" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.target = "_blank";
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
 }
 
 // ---- START ----
