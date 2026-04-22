@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prospecting Campaign Builder</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #003057;
+    --blue: #0066A4;
+    --amber: #F5A800;
+    --cyan: #00A9CE;
+    --white: #FFFFFF;
+    --gray-50: #F7F9FC;
+    --gray-100: #EEF2F7;
+    --gray-200: #D8E2EE;
+    --gray-400: #8FA3BB;
+    --gray-600: #4A6580;
+    --gray-800: #1E3048;
+    --success: #1A8F5A;
+    --danger: #C0392B;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Barlow', sans-serif; background: var(--gray-50); color: var(--gray-800); min-height: 100vh; }
+
+  /* HEADER */
+  .site-header {
+    background: var(--navy); padding: 0 40px;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px; position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+  }
+  .site-header h1 { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 800; color: var(--white); letter-spacing: 0.04em; text-transform: uppercase; }
+  .site-header h1 span { color: var(--amber); }
+  .header-tag { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 600; color: var(--cyan); letter-spacing: 0.12em; text-transform: uppercase; border: 1px solid var(--cyan); padding: 4px 10px; border-radius: 2px; }
+
+  /* PROGRESS NAV */
+  .progress-nav {
+    background: var(--white); border-bottom: 1px solid var(--gray-200);
+    padding: 0 40px; display: flex; gap: 0; overflow-x: auto;
+  }
+  .nav-step {
+    display: flex; align-items: center; gap: 8px;
+    padding: 14px 20px; cursor: pointer;
+    border-bottom: 3px solid transparent;
+    font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.07em; color: var(--gray-400);
+    transition: all 0.15s; white-space: nowrap;
+  }
+  .nav-step:hover { color: var(--navy); }
+  .nav-step.active { color: var(--navy); border-bottom-color: var(--amber); }
+  .nav-step.done { color: var(--blue); }
+  .nav-step .ns-num {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--gray-200); color: var(--gray-600);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 800; flex-shrink: 0;
+  }
+  .nav-step.active .ns-num { background: var(--amber); color: var(--navy); }
+  .nav-step.done .ns-num { background: var(--blue); color: var(--white); }
+
+  /* LAYOUT */
+  .page-wrap { max-width: 900px; margin: 0 auto; padding: 36px 24px 80px; }
+
+  /* PANELS */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* CARDS */
+  .card { background: var(--white); border-radius: 6px; border: 1px solid var(--gray-200); box-shadow: 0 1px 4px rgba(0,48,87,0.06); margin-bottom: 24px; overflow: hidden; }
+  .card-header { background: var(--navy); padding: 14px 24px; display: flex; align-items: center; gap: 10px; }
+  .card-header .step-badge { background: var(--amber); color: var(--navy); font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 800; padding: 2px 9px; border-radius: 2px; letter-spacing: 0.06em; white-space: nowrap; }
+  .card-header h2 { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; color: var(--white); letter-spacing: 0.04em; text-transform: uppercase; }
+  .card-body { padding: 24px; }
+
+  /* FIELDS */
+  .field-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 16px; }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--gray-600); }
+  .field input, .field textarea, .field select {
+    font-family: 'Barlow', sans-serif; font-size: 14px; color: var(--navy);
+    background: var(--gray-50); border: 1.5px solid var(--gray-200); border-radius: 4px;
+    padding: 9px 12px; transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .field input:focus, .field textarea:focus, .field select:focus { outline: none; border-color: var(--blue); background: var(--white); box-shadow: 0 0 0 3px rgba(0,102,164,0.1); }
+  .field textarea { resize: vertical; min-height: 72px; line-height: 1.5; }
+  .field .hint { font-size: 11px; color: var(--gray-400); line-height: 1.4; }
+
+  /* LEAD TABS */
+  .lead-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 20px; align-items: center; }
+  .lead-tab {
+    font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700;
+    padding: 6px 14px; border-radius: 3px; cursor: pointer;
+    border: 1.5px solid var(--gray-200); background: var(--white); color: var(--gray-600);
+    transition: all 0.15s; text-transform: uppercase; letter-spacing: 0.05em;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .lead-tab:hover { border-color: var(--blue); color: var(--blue); }
+  .lead-tab.active { background: var(--navy); border-color: var(--navy); color: var(--white); }
+  .lead-tab.has-data { border-color: var(--cyan); color: var(--cyan); }
+  .lead-tab.has-data.active { background: var(--navy); border-color: var(--navy); color: var(--white); }
+  .lead-tab .tab-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--cyan); display: none; }
+  .lead-tab.has-data .tab-dot { display: block; }
+  .lead-tab.active .tab-dot { background: var(--amber); display: block; }
+  .btn-add-lead {
+    font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700;
+    padding: 6px 14px; border-radius: 3px; cursor: pointer;
+    border: 1.5px dashed var(--gray-200); background: none; color: var(--gray-400);
+    transition: all 0.15s; text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .btn-add-lead:hover { border-color: var(--amber); color: var(--amber); }
+
+  /* LEAD FORM */
+  .lead-form { display: none; }
+  .lead-form.active { display: block; }
+
+  /* PAIN FIELDS */
+  .pain-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 4px; }
+  .pain-item { display: flex; flex-direction: column; gap: 5px; }
+  .pain-item label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--gray-600); }
+  .pain-num { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background: var(--amber); color: var(--navy); font-size: 10px; font-weight: 800; margin-right: 4px; }
+  .pain-item textarea { font-family: 'Barlow', sans-serif; font-size: 13px; min-height: 60px; resize: vertical; background: var(--gray-50); border: 1.5px solid var(--gray-200); border-radius: 4px; padding: 8px 10px; color: var(--navy); transition: border-color 0.15s; }
+  .pain-item textarea:focus { outline: none; border-color: var(--blue); background: var(--white); }
+
+  /* SPIN SECTION */
+  .spin-section { margin-top: 20px; }
+  .spin-generate-bar {
+    display: flex; align-items: center; gap: 12px;
+    background: linear-gradient(135deg, var(--navy), #005080);
+    border-radius: 5px; padding: 14px 18px; margin-bottom: 16px;
+  }
+  .spin-generate-bar p { font-size: 13px; color: rgba(255,255,255,0.8); line-height: 1.5; flex: 1; }
+  .spin-generate-bar p strong { color: var(--white); }
+  .btn-generate {
+    background: var(--amber); color: var(--navy); border: none;
+    font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    padding: 10px 20px; border-radius: 3px; cursor: pointer;
+    transition: all 0.15s; white-space: nowrap; flex-shrink: 0;
+  }
+  .btn-generate:hover { background: #e09900; }
+  .btn-generate:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .spin-output { display: none; }
+  .spin-output.show { display: block; }
+  .spin-cards { display: flex; flex-direction: column; gap: 10px; }
+  .spin-card { border-radius: 4px; overflow: hidden; border: 1px solid var(--gray-200); }
+  .spin-card-header { padding: 8px 14px; display: flex; align-items: center; gap: 8px; }
+  .spin-card-header .spin-type { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; }
+  .spin-card-header .spin-desc { font-size: 12px; opacity: 0.8; }
+  .spin-card.S .spin-card-header { background: #E8F3FA; }
+  .spin-card.S .spin-type { color: var(--blue); }
+  .spin-card.P .spin-card-header { background: #FEF3E2; }
+  .spin-card.P .spin-type { color: #B85C00; }
+  .spin-card.I .spin-card-header { background: #FDE8E8; }
+  .spin-card.I .spin-type { color: var(--danger); }
+  .spin-card.N .spin-card-header { background: #E8F7F0; }
+  .spin-card.N .spin-type { color: var(--success); }
+  .spin-card-body { padding: 10px 14px; background: var(--white); }
+  .spin-q { font-size: 13px; color: var(--gray-800); line-height: 1.55; padding: 5px 0; border-bottom: 1px solid var(--gray-100); }
+  .spin-q:last-child { border-bottom: none; }
+  .spin-reminder {
+    background: #FEF3E2; border: 1px solid #F5C67A; border-radius: 4px;
+    padding: 10px 14px; font-size: 12px; color: #7A4800; line-height: 1.5;
+    margin-top: 10px; display: flex; gap: 8px; align-items: flex-start;
+  }
+
+  .spin-loading { display: none; align-items: center; gap: 10px; padding: 16px 0; color: var(--gray-600); font-size: 13px; }
+  .spin-loading.show { display: flex; }
+  .spinner { width: 20px; height: 20px; border: 2px solid var(--gray-200); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* CADENCE */
+  .cadence-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 4px; }
+  .cadence-table th { background: var(--navy); color: var(--white); font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; padding: 8px 12px; text-align: left; }
+  .cadence-table td { padding: 8px 10px; border-bottom: 1px solid var(--gray-100); vertical-align: middle; }
+  .cadence-table tr:nth-child(even) { background: var(--gray-50); }
+  .cadence-table td:first-child { font-weight: 600; color: var(--navy); font-size: 13px; white-space: nowrap; }
+  .cadence-table td:nth-child(2) { color: var(--gray-600); font-size: 12px; }
+  .day-badge { display: inline-block; background: var(--navy); color: var(--white); font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 800; padding: 2px 8px; border-radius: 2px; margin-right: 6px; }
+  .date-input { font-family: 'Barlow', sans-serif; font-size: 13px; border: 1.5px solid var(--gray-200); border-radius: 3px; padding: 5px 8px; background: var(--white); color: var(--navy); width: 140px; }
+  .date-input:focus { outline: none; border-color: var(--blue); }
+  .channel-checks { display: flex; gap: 8px; flex-wrap: wrap; }
+  .ch-label { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--gray-600); cursor: pointer; }
+  .ch-label input { accent-color: var(--blue); }
+
+  /* CADENCE COMMITMENT NOTE */
+  .commitment-note {
+    background: var(--gray-50); border: 1.5px solid var(--amber);
+    border-radius: 5px; padding: 14px 18px; margin-bottom: 20px;
+    font-size: 13px; color: var(--gray-800); line-height: 1.6;
+  }
+  .commitment-note strong { color: var(--navy); }
+
+  /* SECTION DIVIDER */
+  .section-divider { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.09em; color: var(--navy); border-bottom: 2px solid var(--amber); padding-bottom: 6px; margin: 20px 0 14px; }
+
+  /* BUTTONS */
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 24px; align-items: center; }
+  .btn-primary {
+    background: var(--navy); color: var(--white); border: none;
+    font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    padding: 10px 22px; border-radius: 4px; cursor: pointer; transition: all 0.15s;
+  }
+  .btn-primary:hover { background: var(--blue); }
+  .btn-secondary {
+    background: none; color: var(--gray-600); border: 1.5px solid var(--gray-200);
+    font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    padding: 9px 18px; border-radius: 4px; cursor: pointer; transition: all 0.15s;
+  }
+  .btn-secondary:hover { border-color: var(--blue); color: var(--blue); }
+  .btn-export {
+    background: var(--amber); color: var(--navy); border: none;
+    font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    padding: 10px 22px; border-radius: 4px; cursor: pointer; transition: all 0.15s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .btn-export:hover { background: #e09900; }
+
+  /* REVIEW PANEL */
+  .review-lead { background: var(--white); border: 1px solid var(--gray-200); border-radius: 5px; margin-bottom: 16px; overflow: hidden; }
+  .review-lead-header { background: var(--navy); padding: 10px 18px; display: flex; justify-content: space-between; align-items: center; }
+  .review-lead-header .rh-name { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 800; color: var(--white); text-transform: uppercase; letter-spacing: 0.04em; }
+  .review-lead-header .rh-company { font-size: 12px; color: rgba(255,255,255,0.65); margin-top: 2px; }
+  .review-lead-body { padding: 16px 18px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .review-section-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-400); margin-bottom: 6px; }
+  .review-item { font-size: 13px; color: var(--gray-800); line-height: 1.5; }
+  .review-item span { color: var(--gray-400); font-size: 11px; display: block; }
+  .no-spin-note { font-size: 12px; color: var(--gray-400); font-style: italic; }
+
+  /* SUMMARY STRIP */
+  .summary-strip { display: flex; gap: 20px; background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: 5px; padding: 14px 20px; margin-bottom: 24px; flex-wrap: wrap; }
+  .ss-item { display: flex; flex-direction: column; gap: 2px; }
+  .ss-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em; color: var(--gray-400); }
+  .ss-value { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 800; color: var(--navy); }
+
+  @media (max-width: 640px) {
+    .site-header { padding: 0 16px; }
+    .progress-nav { padding: 0 12px; }
+    .page-wrap { padding: 20px 12px 60px; }
+    .card-body { padding: 16px; }
+    .review-lead-body { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <h1>Prospecting <span>Campaign Builder</span></h1>
+  <span class="header-tag">HUB SFD</span>
+</header>
+
+<nav class="progress-nav">
+  <div class="nav-step active" id="nav-1" onclick="goToPanel(1)">
+    <div class="ns-num">1</div> Campaign Setup
+  </div>
+  <div class="nav-step" id="nav-2" onclick="goToPanel(2)">
+    <div class="ns-num">2</div> Leads &amp; Research
+  </div>
+  <div class="nav-step" id="nav-3" onclick="goToPanel(3)">
+    <div class="ns-num">3</div> SPIN Prep
+  </div>
+  <div class="nav-step" id="nav-4" onclick="goToPanel(4)">
+    <div class="ns-num">4</div> Cadence Commitment
+  </div>
+  <div class="nav-step" id="nav-5" onclick="goToPanel(5)">
+    <div class="ns-num">5</div> Review &amp; Export
+  </div>
+</nav>
+
+<div class="page-wrap">
+
+  <!-- PANEL 1: CAMPAIGN SETUP -->
+  <div class="panel active" id="panel-1">
+    <div class="card">
+      <div class="card-header">
+        <span class="step-badge">STEP 1</span>
+        <h2>Campaign Setup</h2>
+      </div>
+      <div class="card-body">
+        <p style="font-size:13px;color:var(--gray-600);margin-bottom:20px;">Name your campaign and set your focus before you start building your lead list. A well-defined campaign targets a specific industry and role so your outreach feels relevant, not generic.</p>
+        <div class="field-row">
+          <div class="field">
+            <label>Campaign Name</label>
+            <input type="text" id="campaignName" placeholder="e.g. Q3 Manufacturing Push">
+          </div>
+          <div class="field">
+            <label>Your Name</label>
+            <input type="text" id="producerName" placeholder="Your full name">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Start Date</label>
+            <input type="date" id="campaignStart">
+          </div>
+          <div class="field">
+            <label>End Date</label>
+            <input type="date" id="campaignEnd">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Target Industry 1 (be specific)</label>
+            <input type="text" id="industry1" placeholder="e.g. Mid-size manufacturing, 50-200 employees">
+          </div>
+          <div class="field">
+            <label>Target Industry 2 (be specific)</label>
+            <input type="text" id="industry2" placeholder="e.g. Regional logistics &amp; distribution">
+          </div>
+        </div>
+        <div class="field">
+          <label>Campaign Goal</label>
+          <textarea id="campaignGoal" placeholder="e.g. Secure 3 first conversations with CFOs or COOs in manufacturing by end of Q3"></textarea>
+        </div>
+        <div class="btn-row">
+          <button class="btn-primary" onclick="goToPanel(2)">Next: Add Leads →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL 2: LEADS & RESEARCH -->
+  <div class="panel" id="panel-2">
+    <div class="card">
+      <div class="card-header">
+        <span class="step-badge">STEP 2</span>
+        <h2>Leads &amp; Pre-Call Research</h2>
+      </div>
+      <div class="card-body">
+        <p style="font-size:13px;color:var(--gray-600);margin-bottom:16px;">Add up to 10 leads. For each one, record what you found in your research — a news item, a LinkedIn post, an award, a company announcement. Then identify 1-3 possible pains or challenges. This research feeds your SPIN prep in the next step.</p>
+
+        <div class="lead-tabs" id="leadTabs"></div>
+        <div id="leadForms"></div>
+
+        <div class="btn-row">
+          <button class="btn-secondary" onclick="goToPanel(1)">← Back</button>
+          <button class="btn-primary" onclick="goToPanel(3)">Next: SPIN Prep →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL 3: SPIN PREP -->
+  <div class="panel" id="panel-3">
+    <div class="card">
+      <div class="card-header">
+        <span class="step-badge">STEP 3</span>
+        <h2>SPIN Question Prep</h2>
+      </div>
+      <div class="card-body">
+        <p style="font-size:13px;color:var(--gray-600);margin-bottom:8px;">For each lead, generate a set of SPIN questions based on your research. These are <strong>prospecting tools</strong> — they help you think about the pain you might uncover and shape how you open the conversation. You may not get to all of them on a cold call. The goal is always to earn the next conversation.</p>
+
+        <div style="background:#E8F3FA;border:1px solid var(--cyan);border-radius:4px;padding:10px 14px;font-size:12px;color:#0A4A6E;margin-bottom:20px;line-height:1.55;">
+          💡 <strong>What these questions are for:</strong> SPIN questions help you think through the pain a prospect might be experiencing before you pick up the phone. On a cold call, you may only get to ask one or two — and that's fine. The point is to be prepared so that when the prospect says something that hints at a problem, you know how to follow it. Your only goal on this call is to earn a first meeting.
+        </div>
+
+        <div id="spinLeadTabs" class="lead-tabs"></div>
+        <div id="spinForms"></div>
+
+        <div class="btn-row">
+          <button class="btn-secondary" onclick="goToPanel(2)">← Back</button>
+          <button class="btn-primary" onclick="goToPanel(4)">Next: Cadence Commitment →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL 4: CADENCE COMMITMENT -->
+  <div class="panel" id="panel-4">
+    <div class="card">
+      <div class="card-header">
+        <span class="step-badge">STEP 4</span>
+        <h2>Cadence Commitment</h2>
+      </div>
+      <div class="card-body">
+        <div class="commitment-note">
+          <strong>This is your commitment to your campaign.</strong> Block these dates on your calendar now — before you close this tool. Consistent follow-through on a 14-day cadence is what separates producers who get meetings from producers who get ghosted. Your campaign isn't real until the calendar blocks exist.
+        </div>
+
+        <p style="font-size:13px;color:var(--gray-600);margin-bottom:16px;">Enter your planned outreach date for each touchpoint and check which channels you'll use. Track your actual outcomes in CORE.</p>
+
+        <div id="cadenceForms"></div>
+
+        <div class="btn-row">
+          <button class="btn-secondary" onclick="goToPanel(3)">← Back</button>
+          <button class="btn-primary" onclick="goToPanel(5)">Next: Review &amp; Export →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL 5: REVIEW & EXPORT -->
+  <div class="panel" id="panel-5">
+    <div class="card">
+      <div class="card-header">
+        <span class="step-badge">STEP 5</span>
+        <h2>Review &amp; Export</h2>
+      </div>
+      <div class="card-body">
+        <p style="font-size:13px;color:var(--gray-600);margin-bottom:20px;">Review your complete campaign plan below. When you're ready, download it as a PDF to share with your coach or keep as a reference during your outreach.</p>
+        <div id="reviewContent"></div>
+        <div class="btn-row">
+          <button class="btn-secondary" onclick="goToPanel(4)">← Back</button>
+          <button class="btn-export" onclick="exportPDF()">⬇ Download Campaign Plan (PDF)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ---- STATE ----
+let leads = [];
+let numLeads = 1;
+const MAX_LEADS = 10;
+
+const CADENCE_DAYS = [
+  { day: "Day 1",  desc: "Initial outreach — LinkedIn message and/or email" },
+  { day: "Day 4",  desc: "Phone call + follow-up email" },
+  { day: "Day 7",  desc: "Phone call + voicemail + social media follow-up" },
+  { day: "Day 10", desc: "Phone call + follow-up email" },
+  { day: "Day 14", desc: "Final phone call + breakup voicemail if no response" },
+];
+
+const CHANNELS = ["Phone", "Email", "LinkedIn", "Voicemail", "Other"];
+
+// ---- INIT ----
+function init() {
+  for (let i = 0; i < 1; i++) addLead(false);
+  renderLeadTabs();
+  renderSpinTabs();
+  renderCadenceForms();
+  showLeadForm(0);
+  showSpinForm(0);
+}
+
+function getLead(i) {
+  return leads[i] || {};
+}
+
+function saveLead(i) {
+  if (!leads[i]) leads[i] = {};
+  leads[i].company     = val(`lead-company-${i}`);
+  leads[i].contact     = val(`lead-contact-${i}`);
+  leads[i].title       = val(`lead-title-${i}`);
+  leads[i].source      = val(`lead-source-${i}`);
+  leads[i].phone       = val(`lead-phone-${i}`);
+  leads[i].email       = val(`lead-email-${i}`);
+  leads[i].newsItem    = val(`lead-news-${i}`);
+  leads[i].rapport     = val(`lead-rapport-${i}`);
+  leads[i].pain1       = val(`lead-pain1-${i}`);
+  leads[i].pain2       = val(`lead-pain2-${i}`);
+  leads[i].pain3       = val(`lead-pain3-${i}`);
+}
+
+function val(id) {
+  const el = document.getElementById(id);
+  return el ? el.value.trim() : "";
+}
+
+function hasData(i) {
+  return !!(val(`lead-company-${i}`) || val(`lead-contact-${i}`));
+}
+
+// ---- LEADS ----
+function addLead(render = true) {
+  if (numLeads > MAX_LEADS) return;
+  const i = numLeads - 1;
+  leads[i] = { spin: null, cadence: {} };
+
+  // Lead form
+  const lf = document.createElement("div");
+  lf.className = "lead-form";
+  lf.id = `lead-form-${i}`;
+  lf.innerHTML = `
+    <div class="section-divider">Contact Information</div>
+    <div class="field-row">
+      <div class="field"><label>Company</label><input type="text" id="lead-company-${i}" placeholder="Company name" oninput="updateTabLabel(${i})"></div>
+      <div class="field"><label>Contact Name</label><input type="text" id="lead-contact-${i}" placeholder="First and last name" oninput="updateTabLabel(${i})"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Title / Role</label><input type="text" id="lead-title-${i}" placeholder="e.g. CFO, VP of Operations"></div>
+      <div class="field"><label>Source</label><input type="text" id="lead-source-${i}" placeholder="e.g. LinkedIn, referral from John"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Phone</label><input type="text" id="lead-phone-${i}" placeholder="Direct line if available"></div>
+      <div class="field"><label>Email</label><input type="text" id="lead-email-${i}" placeholder="Work email"></div>
+    </div>
+
+    <div class="section-divider">Pre-Call Research</div>
+    <div class="field" style="margin-bottom:12px;">
+      <label>News Item / Trigger Event</label>
+      <textarea id="lead-news-${i}" placeholder="What did you find? (e.g. LinkedIn post about new facility opening, press release about acquisition, award announcement, industry article they shared...)"></textarea>
+      <span class="hint">This is your conversation starter — something that shows you did your homework and creates a natural reason to reach out.</span>
+    </div>
+    <div class="field" style="margin-bottom:16px;">
+      <label>Personal Rapport Hook</label>
+      <textarea id="lead-rapport-${i}" placeholder="Shared connection, alma mater, mutual group, shared interest found on LinkedIn..." style="min-height:52px;"></textarea>
+    </div>
+
+    <div class="section-divider">Possible Pains / Challenges</div>
+    <p style="font-size:12px;color:var(--gray-400);margin-bottom:10px;line-height:1.5;">Based on your research, what problems or challenges might this prospect be facing? These feed your SPIN questions in the next step. You don't need all three.</p>
+    <div class="pain-grid">
+      <div class="pain-item">
+        <label><span class="pain-num">1</span>Possible Pain / Challenge</label>
+        <textarea id="lead-pain1-${i}" placeholder="e.g. Rapid headcount growth may be straining their benefits administration"></textarea>
+      </div>
+      <div class="pain-item">
+        <label><span class="pain-num">2</span>Possible Pain / Challenge</label>
+        <textarea id="lead-pain2-${i}" placeholder="e.g. Recent acquisition may have created compliance gaps"></textarea>
+      </div>
+      <div class="pain-item">
+        <label><span class="pain-num">3</span>Possible Pain / Challenge</label>
+        <textarea id="lead-pain3-${i}" placeholder="e.g. Expanding to new states — may not have reviewed coverage geography"></textarea>
+      </div>
+    </div>
+  `;
+  document.getElementById("leadForms").appendChild(lf);
+
+  // Spin form
+  const sf = document.createElement("div");
+  sf.className = "lead-form";
+  sf.id = `spin-form-${i}`;
+  sf.innerHTML = `
+    <div class="spin-section">
+      <div class="spin-generate-bar">
+        <p><strong>Generate SPIN questions for this lead.</strong><br>Claude will use your research notes and identified pains to build tailored questions for this prospect.</p>
+        <button class="btn-generate" id="btn-gen-${i}" onclick="generateSpin(${i})">Generate Questions</button>
+      </div>
+      <div class="spin-loading" id="spin-loading-${i}">
+        <div class="spinner"></div>
+        <span>Generating your SPIN questions...</span>
+      </div>
+      <div class="spin-output" id="spin-output-${i}">
+        <div class="spin-cards" id="spin-cards-${i}"></div>
+        <div class="spin-reminder">
+          ⚠️ <span><strong>Cold call reminder:</strong> These questions are preparation, not a script. On a cold call, your only goal is to earn a first meeting. Lead with your trigger event or rapport hook to open the conversation. If the prospect engages, one well-placed Problem or Implication question can be enough to move things forward. Don't try to cover everything — just get the next commitment.</span>
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById("spinForms").appendChild(sf);
+
+  // Cadence form
+  renderCadenceForLead(i);
+
+  if (render) {
+    numLeads++;
+    renderLeadTabs();
+    renderSpinTabs();
+    showLeadForm(i);
+    showSpinForm(i);
+  } else {
+    numLeads++;
+  }
+}
+
+function renderCadenceForLead(i) {
+  const cf = document.getElementById("cadenceForms");
+  const existing = document.getElementById(`cadence-lead-${i}`);
+  if (existing) return;
+
+  const div = document.createElement("div");
+  div.id = `cadence-lead-${i}`;
+  div.style.marginBottom = "24px";
+  div.innerHTML = `
+    <div class="section-divider" id="cadence-title-${i}">Lead ${i+1}: <span id="cadence-name-${i}" style="color:var(--gray-400);font-weight:400;">Not yet named</span></div>
+    <table class="cadence-table">
+      <thead><tr><th>Touchpoint</th><th>What you'll do</th><th>Planned Date</th><th>Channels</th></tr></thead>
+      <tbody>
+        ${CADENCE_DAYS.map((d, di) => `
+        <tr>
+          <td><span class="day-badge">${d.day}</span></td>
+          <td>${d.desc}</td>
+          <td><input type="date" class="date-input" id="cad-date-${i}-${di}"></td>
+          <td>
+            <div class="channel-checks">
+              ${CHANNELS.map(ch => `<label class="ch-label"><input type="checkbox" id="cad-ch-${i}-${di}-${ch.toLowerCase()}"> ${ch}</label>`).join("")}
+            </div>
+          </td>
+        </tr>`).join("")}
+      </tbody>
+    </table>
+  `;
+  cf.appendChild(div);
+}
+
+function renderCadenceForms() {
+  for (let i = 0; i < numLeads - 1; i++) {
+    renderCadenceForLead(i);
+  }
+}
+
+function updateTabLabel(i) {
+  const company = val(`lead-company-${i}`);
+  const contact = val(`lead-contact-${i}`);
+  const label = company || contact || `Lead ${i+1}`;
+  const tab = document.getElementById(`lead-tab-${i}`);
+  if (tab) tab.querySelector(".tab-text").textContent = label.length > 14 ? label.substring(0,14)+"…" : label;
+  const stab = document.getElementById(`spin-tab-${i}`);
+  if (stab) stab.querySelector(".tab-text").textContent = label.length > 14 ? label.substring(0,14)+"…" : label;
+  // Update cadence title
+  const cname = document.getElementById(`cadence-name-${i}`);
+  if (cname) cname.textContent = (contact || company) ? `${contact}${company ? " — "+company : ""}` : "Not yet named";
+  // Mark has-data
+  if (tab && hasData(i)) tab.classList.add("has-data");
+}
+
+function renderLeadTabs() {
+  const container = document.getElementById("leadTabs");
+  container.innerHTML = "";
+  for (let i = 0; i < numLeads - 1; i++) {
+    const label = (val(`lead-company-${i}`) || val(`lead-contact-${i}`) || `Lead ${i+1}`);
+    const short = label.length > 14 ? label.substring(0,14)+"…" : label;
+    const btn = document.createElement("div");
+    btn.className = `lead-tab${hasData(i) ? " has-data" : ""}`;
+    btn.id = `lead-tab-${i}`;
+    btn.innerHTML = `<div class="tab-dot"></div><span class="tab-text">${short}</span>`;
+    btn.onclick = () => { saveAllLeads(); showLeadForm(i); };
+    container.appendChild(btn);
+  }
+  if (numLeads - 1 < MAX_LEADS) {
+    const addBtn = document.createElement("button");
+    addBtn.className = "btn-add-lead";
+    addBtn.textContent = "+ Add Lead";
+    addBtn.onclick = () => { saveAllLeads(); addLead(true); };
+    container.appendChild(addBtn);
+  }
+}
+
+function renderSpinTabs() {
+  const container = document.getElementById("spinLeadTabs");
+  container.innerHTML = "";
+  for (let i = 0; i < numLeads - 1; i++) {
+    const label = val(`lead-company-${i}`) || val(`lead-contact-${i}`) || `Lead ${i+1}`;
+    const short = label.length > 14 ? label.substring(0,14)+"…" : label;
+    const btn = document.createElement("div");
+    btn.className = "lead-tab";
+    btn.id = `spin-tab-${i}`;
+    btn.innerHTML = `<div class="tab-dot"></div><span class="tab-text">${short}</span>`;
+    btn.onclick = () => showSpinForm(i);
+    container.appendChild(btn);
+  }
+}
+
+function showLeadForm(i) {
+  document.querySelectorAll(".lead-form").forEach(f => f.classList.remove("active"));
+  document.querySelectorAll(".lead-tab").forEach(t => t.classList.remove("active"));
+  const form = document.getElementById(`lead-form-${i}`);
+  const tab = document.getElementById(`lead-tab-${i}`);
+  if (form) form.classList.add("active");
+  if (tab) tab.classList.add("active");
+}
+
+function showSpinForm(i) {
+  document.querySelectorAll("#spinForms .lead-form").forEach(f => f.classList.remove("active"));
+  document.querySelectorAll("#spinLeadTabs .lead-tab").forEach(t => t.classList.remove("active"));
+  const form = document.getElementById(`spin-form-${i}`);
+  const tab = document.getElementById(`spin-tab-${i}`);
+  if (form) form.classList.add("active");
+  if (tab) tab.classList.add("active");
+}
+
+function saveAllLeads() {
+  for (let i = 0; i < numLeads - 1; i++) saveLead(i);
+}
+
+// ---- SPIN GENERATION ----
+async function generateSpin(i) {
+  saveLead(i);
+  const lead = leads[i];
+
+  const pains = [lead.pain1, lead.pain2, lead.pain3].filter(Boolean);
+  if (!lead.company && !lead.contact && pains.length === 0 && !lead.newsItem) {
+    alert("Please fill in at least the company name, a pain/challenge, or a research note before generating SPIN questions.");
+    return;
+  }
+
+  const btn = document.getElementById(`btn-gen-${i}`);
+  const loading = document.getElementById(`spin-loading-${i}`);
+  const output = document.getElementById(`spin-output-${i}`);
+
+  btn.disabled = true;
+  loading.classList.add("show");
+  output.classList.remove("show");
+
+  const prompt = `You are a sales coach at HUB International, an insurance brokerage. A producer is preparing to cold call a prospect. Their goal is NOT to run a full discovery — it is to earn a first conversation. Generate SPIN questions to help them prepare.
+
+Prospect details:
+- Company: ${lead.company || "Not specified"}
+- Contact: ${lead.contact || "Not specified"} (${lead.title || "Title unknown"})
+- Research / trigger event: ${lead.newsItem || "None provided"}
+- Rapport hook: ${lead.rapport || "None provided"}
+- Possible pains/challenges identified: ${pains.length > 0 ? pains.join("; ") : "None provided"}
+
+Generate SPIN questions in this exact JSON format. Each type should have 2-3 questions maximum. Keep questions conversational and appropriate for a cold call — brief, natural, not interrogative. Implication questions should connect the pain to business consequences without being presumptuous. Need-Payoff questions should open the door to a solution without naming one specifically.
+
+Return ONLY valid JSON, no other text:
+{
+  "situation": ["question 1", "question 2"],
+  "problem": ["question 1", "question 2"],
+  "implication": ["question 1", "question 2"],
+  "needPayoff": ["question 1", "question 2"]
+}`;
+
+  try {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1000,
+        messages: [{ role: "user", content: prompt }]
+      })
+    });
+
+    const data = await response.json();
+    const text = data.content.map(c => c.text || "").join("").trim();
+    const clean = text.replace(/```json|```/g, "").trim();
+    const parsed = JSON.parse(clean);
+
+    leads[i].spin = parsed;
+    renderSpinOutput(i, parsed);
+    output.classList.add("show");
+
+    // Mark spin tab as done
+    const tab = document.getElementById(`spin-tab-${i}`);
+    if (tab) tab.classList.add("has-data");
+
+  } catch(err) {
+    output.innerHTML = `<div style="color:var(--danger);font-size:13px;padding:10px 0;">Something went wrong generating questions. Please check your research notes and try again.</div>`;
+    output.classList.add("show");
+  }
+
+  loading.classList.remove("show");
+  btn.disabled = false;
+  btn.textContent = "Regenerate";
+}
+
+function renderSpinOutput(i, spin) {
+  const container = document.getElementById(`spin-cards-${i}`);
+  const types = [
+    { key: "situation",  cls: "S", label: "Situation",   desc: "Establish context — keep it brief" },
+    { key: "problem",    cls: "P", label: "Problem",     desc: "Surface the pain" },
+    { key: "implication",cls: "I", label: "Implication", desc: "Connect pain to consequences — most powerful" },
+    { key: "needPayoff", cls: "N", label: "Need-Payoff", desc: "Open the door to a solution" },
+  ];
+  container.innerHTML = types.map(t => {
+    const qs = spin[t.key] || [];
+    return `
+    <div class="spin-card ${t.cls}">
+      <div class="spin-card-header">
+        <span class="spin-type">${t.label}</span>
+        <span class="spin-desc">${t.desc}</span>
+      </div>
+      <div class="spin-card-body">
+        ${qs.map(q => `<div class="spin-q">${q}</div>`).join("")}
+      </div>
+    </div>`;
+  }).join("");
+}
+
+// ---- NAVIGATION ----
+function goToPanel(n) {
+  if (n >= 2) saveAllLeads();
+  if (n === 5) buildReview();
+
+  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+  document.getElementById(`panel-${n}`).classList.add("active");
+
+  document.querySelectorAll(".nav-step").forEach((s, idx) => {
+    s.classList.remove("active", "done");
+    if (idx + 1 === n) s.classList.add("active");
+    if (idx + 1 < n) s.classList.add("done");
+  });
+
+  // Sync cadence lead names
+  if (n === 4) {
+    for (let i = 0; i < numLeads - 1; i++) {
+      const cname = document.getElementById(`cadence-name-${i}`);
+      const contact = val(`lead-contact-${i}`);
+      const company = val(`lead-company-${i}`);
+      if (cname) cname.textContent = (contact || company) ? `${contact}${company ? " — "+company : ""}` : "Not yet named";
+    }
+  }
+
+  // Sync spin tabs
+  if (n === 3) {
+    renderSpinTabs();
+    showSpinForm(0);
+  }
+
+  window.scrollTo(0, 0);
+}
+
+// ---- REVIEW ----
+function buildReview() {
+  saveAllLeads();
+  const container = document.getElementById("reviewContent");
+
+  const campaignName = val("campaignName") || "Untitled Campaign";
+  const producerName = val("producerName") || "—";
+  const start = val("campaignStart") || "—";
+  const end = val("campaignEnd") || "—";
+  const i1 = val("industry1") || "—";
+  const i2 = val("industry2") || "—";
+  const goal = val("campaignGoal") || "—";
+
+  const filledLeads = leads.filter((l, i) => l && (l.company || l.contact));
+
+  let html = `
+  <div class="summary-strip">
+    <div class="ss-item"><div class="ss-label">Campaign</div><div class="ss-value" style="font-size:16px;">${campaignName}</div></div>
+    <div class="ss-item"><div class="ss-label">Producer</div><div class="ss-value" style="font-size:16px;">${producerName}</div></div>
+    <div class="ss-item"><div class="ss-label">Dates</div><div class="ss-value" style="font-size:14px;">${start} → ${end}</div></div>
+    <div class="ss-item"><div class="ss-label">Leads</div><div class="ss-value">${filledLeads.length}</div></div>
+  </div>`;
+
+  filledLeads.forEach((lead, idx) => {
+    const realIdx = leads.indexOf(lead);
+    const spin = lead.spin;
+    const pains = [lead.pain1, lead.pain2, lead.pain3].filter(Boolean);
+
+    // Cadence summary
+    const cadenceSummary = CADENCE_DAYS.map((d, di) => {
+      const date = document.getElementById(`cad-date-${realIdx}-${di}`)?.value || "";
+      const channels = CHANNELS.filter(ch => document.getElementById(`cad-ch-${realIdx}-${di}-${ch.toLowerCase()}`)?.checked).join(", ");
+      return `<div style="display:flex;gap:8px;align-items:baseline;font-size:12px;padding:4px 0;border-bottom:1px solid var(--gray-100);">
+        <span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;color:var(--navy);min-width:50px;">${d.day}</span>
+        <span style="color:var(--gray-600);">${date || "No date set"}</span>
+        ${channels ? `<span style="color:var(--gray-400);">— ${channels}</span>` : ""}
+      </div>`;
+    }).join("");
+
+    html += `
+    <div class="review-lead">
+      <div class="review-lead-header">
+        <div>
+          <div class="rh-name">${lead.contact || "Unnamed Contact"}</div>
+          <div class="rh-company">${lead.company || ""}${lead.title ? " · " + lead.title : ""}${lead.source ? " · Source: " + lead.source : ""}</div>
+        </div>
+      </div>
+      <div class="review-lead-body">
+        <div>
+          <div class="review-section-title">Contact</div>
+          <div class="review-item">${lead.phone || "—"}<span>Phone</span></div>
+          <div class="review-item" style="margin-top:6px;">${lead.email || "—"}<span>Email</span></div>
+          ${lead.rapport ? `<div class="review-item" style="margin-top:10px;">${lead.rapport}<span>Rapport Hook</span></div>` : ""}
+          ${lead.newsItem ? `<div class="review-item" style="margin-top:10px;">${lead.newsItem}<span>Trigger / News Item</span></div>` : ""}
+          ${pains.length ? `<div style="margin-top:10px;"><div class="review-section-title">Identified Pains</div>${pains.map((p,pi) => `<div class="review-item" style="margin-bottom:4px;"><span class="pain-num">${pi+1}</span>${p}</div>`).join("")}</div>` : ""}
+        </div>
+        <div>
+          <div class="review-section-title">SPIN Questions</div>
+          ${spin ? `
+            ${["situation","problem","implication","needPayoff"].map(type => {
+              const labels = {situation:"Situation",problem:"Problem",implication:"Implication",needPayoff:"Need-Payoff"};
+              const qs = spin[type] || [];
+              return qs.length ? `<div style="margin-bottom:8px;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--gray-600);margin-bottom:3px;">${labels[type]}</div>${qs.map(q => `<div style="font-size:12px;color:var(--gray-800);padding:2px 0;line-height:1.45;border-bottom:1px solid var(--gray-100);">${q}</div>`).join("")}</div>` : "";
+            }).join("")}
+          ` : `<div class="no-spin-note">No SPIN questions generated for this lead.</div>`}
+          <div style="margin-top:12px;">
+            <div class="review-section-title">Cadence Commitment</div>
+            ${cadenceSummary}
+          </div>
+        </div>
+      </div>
+    </div>`;
+  });
+
+  if (filledLeads.length === 0) {
+    html += `<p style="color:var(--gray-400);font-size:13px;font-style:italic;">No leads entered yet. Go back to Step 2 to add your leads.</p>`;
+  }
+
+  container.innerHTML = html;
+}
+
+// ---- EXPORT ----
+function exportPDF() {
+  saveAllLeads();
+  const campaignName = val("campaignName") || "Untitled Campaign";
+  const producerName = val("producerName") || "";
+  const start = val("campaignStart") || "";
+  const end = val("campaignEnd") || "";
+  const i1 = val("industry1") || "";
+  const i2 = val("industry2") || "";
+  const goal = val("campaignGoal") || "";
+  const today = new Date().toLocaleDateString("en-US", {month:"long",day:"numeric",year:"numeric"});
+  const filledLeads = leads.filter(l => l && (l.company || l.contact));
+
+  let leadsHtml = filledLeads.map((lead, idx) => {
+    const realIdx = leads.indexOf(lead);
+    const pains = [lead.pain1, lead.pain2, lead.pain3].filter(Boolean);
+    const spin = lead.spin;
+
+    const cadenceRows = CADENCE_DAYS.map((d, di) => {
+      const date = document.getElementById(`cad-date-${realIdx}-${di}`)?.value || "Not set";
+      const channels = CHANNELS.filter(ch => document.getElementById(`cad-ch-${realIdx}-${di}-${ch.toLowerCase()}`)?.checked).join(", ");
+      return `<tr><td style="font-weight:700;color:#003057;white-space:nowrap;">${d.day}</td><td style="color:#4A6580;font-size:11px;">${d.desc}</td><td>${date}</td><td>${channels || "—"}</td></tr>`;
+    }).join("");
+
+    const spinHtml = spin ? ["situation","problem","implication","needPayoff"].map(type => {
+      const labels = {situation:"Situation",problem:"Problem",implication:"Implication (most important)",needPayoff:"Need-Payoff"};
+      const colors = {situation:"#0066A4",problem:"#B85C00",implication:"#C0392B",needPayoff:"#1A8F5A"};
+      const qs = spin[type] || [];
+      return qs.length ? `<div style="margin-bottom:8px;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:${colors[type]};margin-bottom:4px;">${labels[type]}</div>${qs.map(q=>`<div style="font-size:12px;padding:4px 0;border-bottom:1px solid #EEF2F7;line-height:1.45;color:#1E3048;">${q}</div>`).join("")}</div>` : "";
+    }).join("") : `<p style="font-size:12px;color:#8FA3BB;font-style:italic;">No SPIN questions generated.</p>`;
+
+    return `
+    <div style="page-break-inside:avoid;margin-bottom:24px;border:1px solid #D8E2EE;border-radius:5px;overflow:hidden;">
+      <div style="background:#003057;padding:10px 16px;">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;color:white;text-transform:uppercase;letter-spacing:0.04em;">${lead.contact || "Unnamed Contact"}</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.65);margin-top:2px;">${lead.company || ""}${lead.title?" · "+lead.title:""}${lead.phone?" · "+lead.phone:""}${lead.email?" · "+lead.email:""}</div>
+      </div>
+      <div style="padding:14px 16px;display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div>
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#8FA3BB;margin-bottom:6px;">Research &amp; Context</div>
+          ${lead.rapport?`<div style="font-size:12px;margin-bottom:8px;"><strong style="color:#003057;">Rapport:</strong> ${lead.rapport}</div>`:""}
+          ${lead.newsItem?`<div style="font-size:12px;margin-bottom:8px;"><strong style="color:#003057;">Trigger:</strong> ${lead.newsItem}</div>`:""}
+          ${pains.length?`<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#8FA3BB;margin:10px 0 6px;">Identified Pains</div>${pains.map((p,pi)=>`<div style="font-size:12px;padding:3px 0;border-bottom:1px solid #EEF2F7;"><strong style="color:#003057;">${pi+1}.</strong> ${p}</div>`).join("")}`:""}
+        </div>
+        <div>
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#8FA3BB;margin-bottom:6px;">SPIN Questions</div>
+          ${spinHtml}
+        </div>
+      </div>
+      <div style="padding:0 16px 14px;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#8FA3BB;margin-bottom:6px;">Cadence Commitment</div>
+        <table style="width:100%;border-collapse:collapse;font-size:12px;">
+          <thead><tr style="background:#003057;"><th style="color:white;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;padding:6px 10px;text-align:left;">Day</th><th style="color:white;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;padding:6px 10px;text-align:left;">Outreach Plan</th><th style="color:white;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;padding:6px 10px;text-align:left;">Date</th><th style="color:white;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;padding:6px 10px;text-align:left;">Channels</th></tr></thead>
+          <tbody>${cadenceRows}</tbody>
+        </table>
+      </div>
+    </div>`;
+  }).join("");
+
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <title>${campaignName} — Campaign Plan</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Barlow:wght@400;500;600&display=swap');
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Barlow', sans-serif; color: #1E3048; background: white; padding: 32px 36px; font-size: 13px; }
+    .header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px solid #003057; padding-bottom: 10px; margin-bottom: 20px; }
+    .header h1 { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 800; color: #003057; text-transform: uppercase; letter-spacing: 0.04em; }
+    .header h1 span { color: #F5A800; }
+    .header .meta { font-size: 12px; color: #8FA3BB; text-align: right; line-height: 1.6; }
+    .campaign-info { background: #F7F9FC; border: 1px solid #D8E2EE; border-radius: 4px; padding: 12px 16px; margin-bottom: 20px; display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+    .ci-item .ci-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em; color: #8FA3BB; margin-bottom: 2px; }
+    .ci-item .ci-value { font-size: 13px; font-weight: 600; color: #003057; }
+    .reminder { background: #FEF3E2; border: 1px solid #F5C67A; border-radius: 4px; padding: 10px 14px; font-size: 11px; color: #7A4800; line-height: 1.5; margin-bottom: 20px; }
+    .footer { margin-top: 24px; padding-top: 10px; border-top: 1px solid #D8E2EE; font-size: 10px; color: #8FA3BB; text-align: center; }
+    tbody tr:nth-child(even) { background: #F7F9FC; }
+    tbody td { padding: 6px 10px; border-bottom: 1px solid #EEF2F7; }
+  </style>
+  </head><body>
+  <div class="header">
+    <div><h1>Prospecting <span>Campaign Plan</span></h1><div style="font-size:13px;color:#4A6580;margin-top:2px;">${producerName}</div></div>
+    <div class="meta">${campaignName}<br>Generated ${today}</div>
+  </div>
+  <div class="campaign-info">
+    <div class="ci-item"><div class="ci-label">Dates</div><div class="ci-value">${start||"—"} → ${end||"—"}</div></div>
+    <div class="ci-item"><div class="ci-label">Target Industry 1</div><div class="ci-value">${i1||"—"}</div></div>
+    <div class="ci-item"><div class="ci-label">Target Industry 2</div><div class="ci-value">${i2||"—"}</div></div>
+    ${goal?`<div class="ci-item" style="grid-column:1/-1;"><div class="ci-label">Campaign Goal</div><div class="ci-value">${goal}</div></div>`:""}
+  </div>
+  <div class="reminder">⚠️ <strong>Cold call reminder:</strong> These questions are preparation, not a script. Your only goal is to earn a first meeting. Lead with your trigger event or rapport hook, and use your SPIN questions to follow the prospect's lead — not as a checklist to get through. Track all outcomes in CORE.</div>
+  ${leadsHtml || `<p style="color:#8FA3BB;font-style:italic;">No leads entered.</p>`}
+  <div class="footer">HUB International — Sales Force Development | Prospecting Campaign Builder</div>
+  </body></html>`;
+
+  const win = window.open("", "_blank");
+  win.document.write(html);
+  win.document.close();
+  win.focus();
+  setTimeout(() => win.print(), 700);
+}
+
+// ---- START ----
+init();
+</script>
+</body>
+</html>
